@@ -2,6 +2,19 @@
 
 A simple Python FastAPI application used to demonstrate **SonarQube** (code quality) and **Trivy** (security) scans within a Jenkins CI/CD pipeline.
 
+# travia installation
+
+cd /tmp
+wget https://github.com/aquasecurity/trivy/releases/download/v0.56.2/trivy_0.56.2_Linux-64bit.tar.gz
+tar zxvf trivy_0.56.2_Linux-64bit.tar.gz
+sudo mv trivy /usr/local/bin/
+trivy --version
+
+sonar initialization:
+docker run -d --name sonarqube \
+  -p 9000:9000 sonarqube:community
+
+
 ## 🚀 Features
 - Lightweight FastAPI web app
 - Dockerized
