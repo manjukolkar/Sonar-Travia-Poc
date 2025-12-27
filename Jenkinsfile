@@ -15,7 +15,7 @@ pipeline {
         stage('Code Quality - SonarQube') {
             steps {
                 withSonarQubeEnv("${SONARQUBE}") {
-                    sh 'sonar-scanner -Dsonar.projectKey=devsecops-landing-page -Dsonar.sources=app -Dsonar.host.url=http://localhost:9000'
+                    sh 'sonar-scanner -Dsonar.projectKey=devsecops-landing-page -Dsonar.sources=app -Dsonar.host.url=http://54.197.126.6:9000'
                 }
             }
         }
