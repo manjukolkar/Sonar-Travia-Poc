@@ -2,20 +2,30 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'SonarQube'  // configured name in Jenkins
+        SONARQUBE = 'SonarQube'
+        SONAR_AUTH_TOKEN = credentials('sonar-token')
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/manjukolkar/Sonar-Travia-Poc.git'
             }
         }
 
-        stage('Code Quality - SonarQube') {
+        stage('Code Quality - SonarQube Scan') {
             steps {
                 withSonarQubeEnv("${SONARQUBE}") {
-                    sh 'sonar-scanner -Dsonar.projectKey=devsecops-landing-page -Dsonar.sources=app -Dsonar.host.url=http://3.80.70.209:9000/'
+                    sh '''
+                    docker run --rm \
+                      -e SONAR_HOST_URL=$SONAR_HOST_URL \
+                      -e SONAR_TOKEN=$SONAR_AUTH_TOKEN \
+                      -v $WORKSPACE:/usr/src \
+                      sonarsource/sonar-scanner-cli \
+                      -Dsonar.projectKey=devsecops-landing-page \
+                      -Dsonar.sources=app
+                    '''
                 }
             }
         }
@@ -28,25 +38,23 @@ pipeline {
 
         stage('Security Scan - Trivy') {
             steps {
-                // Fail if HIGH or CRITICAL vulnerabilities found
                 sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL devsecops-landing-page:latest || true'
             }
         }
 
         stage('Deploy (Optional)') {
             steps {
-                echo "Deployment step placeholder"
+                echo "Deployment placeholder — can integrate ECR/Kubernetes here."
             }
         }
     }
 
     post {
         success {
-            echo "✅ Pipeline completed successfully"
+            echo "✅ Pipeline completed successfully! SonarQube + Trivy passed."
         }
         failure {
-            echo "❌ Pipeline failed. Check SonarQube/Trivy logs."
+            echo "❌ Pipeline failed. Check SonarQube or Trivy logs."
         }
     }
 }
-
